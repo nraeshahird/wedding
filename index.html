@@ -349,45 +349,59 @@
       text-underline-offset: 4px;
     }
 
-    /* ---------- Photo bubble (fading slideshow) ---------- */
-    .bubble {
-      position: absolute;
-      left: 50%;
-      top: calc(-1 * (var(--b) + 14px));
-      width: var(--b);
-      height: var(--b);
-      margin-left: calc(var(--b) / -2);
-      border-radius: 50%;
-      overflow: hidden;
-      border: 2px solid var(--gold);
-      box-shadow: 0 6px 18px rgba(120, 60, 40, 0.3), 0 0 0 4px rgba(255, 246, 239, 0.6);
-      background: #f3d2c6;
-      opacity: 0;
-      transform: scale(0.6);
-      transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
-      pointer-events: none;
-      z-index: 6;
-    }
-    .bubble img {
+    /* ---------- Photo clouds (fading slideshow) ---------- */
+    .clouds {
       position: absolute;
       inset: 0;
+      pointer-events: none;
+      z-index: 6;
+      --H: calc(var(--b) * 1.35);
+      --W: calc(var(--H) * 1.5);
+    }
+    .cloud {
+      position: absolute;
+      width: var(--W);
+      height: var(--H);
+      opacity: 0;
+      filter: drop-shadow(0 0 10px rgba(255, 246, 239, 0.9));
+    }
+    .cloud img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      opacity: 0;
+      display: block;
+      /* puffy cloud silhouette with soft feathered edges */
+      -webkit-mask-image:
+        radial-gradient(ellipse 30% 40% at 24% 64%, #000 45%, transparent 100%),
+        radial-gradient(ellipse 34% 48% at 50% 42%, #000 45%, transparent 100%),
+        radial-gradient(ellipse 30% 40% at 77% 62%, #000 45%, transparent 100%),
+        radial-gradient(ellipse 44% 34% at 50% 70%, #000 45%, transparent 100%);
+      mask-image:
+        radial-gradient(ellipse 30% 40% at 24% 64%, #000 45%, transparent 100%),
+        radial-gradient(ellipse 34% 48% at 50% 42%, #000 45%, transparent 100%),
+        radial-gradient(ellipse 30% 40% at 77% 62%, #000 45%, transparent 100%),
+        radial-gradient(ellipse 44% 34% at 50% 70%, #000 45%, transparent 100%);
     }
-    body.show-bubble .bubble { opacity: 1; transform: scale(1); }
-    body.show-bubble .bubble img {
+    /* positions: alternate above and below the card */
+    .cloud.tl { top: calc(var(--H) * -0.82); left: -3%; }
+    .cloud.tr { top: calc(var(--H) * -0.82); right: -3%; }
+    .cloud.tc { top: calc(var(--H) * -0.88); left: 50%; margin-left: calc(var(--W) / -2); }
+    .cloud.bl { bottom: calc(var(--H) * -0.82); left: -3%; }
+    .cloud.br { bottom: calc(var(--H) * -0.82); right: -3%; }
+    .cloud.bc { bottom: calc(var(--H) * -0.88); left: 50%; margin-left: calc(var(--W) / -2); }
+
+    body.show-bubble .cloud {
       animation: slide 24s linear infinite;
       animation-delay: calc(var(--i) * 4s);
     }
-    /* one photo per 4s slot: fade in, hold, fade out */
+    /* each photo shows for 5s inside a 4s step, so the next one fades in
+       while the previous one is still fading out (about 1s of overlap) */
     @keyframes slide {
-      0%      { opacity: 0; }
-      4%      { opacity: 1; }
-      12.67%  { opacity: 1; }
-      16.67%  { opacity: 0; }
-      100%    { opacity: 0; }
+      0%      { opacity: 0; transform: scale(0.9) translateY(8px); }
+      4.17%   { opacity: 1; }
+      16.67%  { opacity: 1; }
+      20.83%  { opacity: 0; transform: scale(1.05) translateY(-6px); }
+      100%    { opacity: 0; transform: scale(1.05) translateY(-6px); }
     }
 
     /* ---------- Sound toggle ---------- */
@@ -552,13 +566,13 @@
   <div class="petals" id="petals" aria-hidden="true"></div>
 
   <div class="scene">
-    <div class="bubble" aria-hidden="true">
-      <img src="photo1.jpeg" style="--i:0; object-position: 38% 40%" alt="" />
-      <img src="photo2.jpeg" style="--i:1; object-position: 50% 24%" alt="" />
-      <img src="photo3.jpeg" style="--i:2; object-position: 50% 30%" alt="" />
-      <img src="photo4.jpeg" style="--i:3; object-position: 55% 50%" alt="" />
-      <img src="photo5.jpeg" style="--i:4; object-position: 50% 40%" alt="" />
-      <img src="photo6.jpeg" style="--i:5; object-position: 40% 22%" alt="" />
+    <div class="clouds" aria-hidden="true">
+      <div class="cloud tl" style="--i:0"><img src="photo1.jpeg" style="object-position: 38% 40%" alt="" /></div>
+      <div class="cloud br" style="--i:1"><img src="photo2.jpeg" style="object-position: 50% 18%" alt="" /></div>
+      <div class="cloud tr" style="--i:2"><img src="photo3.jpeg" style="object-position: 50% 30%" alt="" /></div>
+      <div class="cloud bl" style="--i:3"><img src="photo4.jpeg" style="object-position: 55% 55%" alt="" /></div>
+      <div class="cloud tc" style="--i:4"><img src="photo5.jpeg" style="object-position: 50% 40%" alt="" /></div>
+      <div class="cloud bc" style="--i:5"><img src="photo6.jpeg" style="object-position: 40% 22%" alt="" /></div>
     </div>
     <div class="card" id="card">
 
