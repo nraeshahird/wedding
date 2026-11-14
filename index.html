@@ -382,6 +382,10 @@
         radial-gradient(ellipse 30% 40% at 77% 62%, #000 45%, transparent 100%),
         radial-gradient(ellipse 44% 34% at 50% 70%, #000 45%, transparent 100%);
     }
+    /* photo 12 is a tall close-up: a squarer cloud shows the whole faces */
+    .cloud.wide2 { width: calc(var(--H) * 1.1); }
+    /* photo 8: narrower and anchored left, where the couple stands (kept centred) */
+    .cloud.tc.narrow8 { width: calc(var(--H) * 1.15); margin-left: calc(var(--H) * -0.575); }
     /* positions: alternate above and below the card */
     .cloud.tl { top: calc(var(--H) * -0.82); left: -3%; }
     .cloud.tr { top: calc(var(--H) * -0.82); right: -3%; }
@@ -568,10 +572,10 @@
   <div class="scene">
     <div class="clouds" aria-hidden="true">
       <div class="cloud tl" style="--i:0"><img src="photo10.jpeg" style="object-position: 38% 40%" alt="" /></div>
-      <div class="cloud br" style="--i:1"><img src="photo12.jpeg" style="object-position: 50% 18%" alt="" /></div>
+      <div class="cloud br wide2" style="--i:1"><img src="photo12.jpeg" style="object-position: 50% 30%" alt="" /></div>
       <div class="cloud tr" style="--i:2"><img src="photo3.jpeg" style="object-position: 50% 30%" alt="" /></div>
       <div class="cloud bl" style="--i:3"><img src="photo4.jpeg" style="object-position: 55% 55%" alt="" /></div>
-      <div class="cloud tc" style="--i:4"><img src="photo8.jpeg" style="object-position: 50% 40%" alt="" /></div>
+      <div class="cloud tc narrow8" style="--i:4"><img src="photo8.jpeg" style="object-position: 6% 50%" alt="" /></div>
       <div class="cloud bc" style="--i:5"><img src="photo11.jpeg" style="object-position: 40% 22%" alt="" /></div>
     </div>
     <div class="card" id="card">
