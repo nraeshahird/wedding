@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&family=Amiri&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preload" as="image" href="photo.jpeg" fetchpriority="high" />
   <style>
     :root {
       --peach: #fbe3d6;
@@ -560,7 +561,7 @@
     </defs>
   </svg>
 
-  <audio id="bgm" src="music.mp3" loop preload="auto"></audio>
+  <audio id="bgm" loop preload="none"></audio>
 
   <button class="sound-btn" id="soundBtn" type="button" aria-label="Bunyi">
     <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>
@@ -571,18 +572,18 @@
 
   <div class="scene">
     <div class="clouds" aria-hidden="true">
-      <div class="cloud tl" style="--i:0"><img src="photo10.jpeg" style="object-position: 38% 40%" alt="" /></div>
-      <div class="cloud br wide2" style="--i:1"><img src="photo12.jpeg" style="object-position: 50% 30%" alt="" /></div>
-      <div class="cloud tr" style="--i:2"><img src="photo3.jpeg" style="object-position: 50% 30%" alt="" /></div>
-      <div class="cloud bl" style="--i:3"><img src="photo4.jpeg" style="object-position: 55% 55%" alt="" /></div>
-      <div class="cloud tc narrow8" style="--i:4"><img src="photo8.jpeg" style="object-position: 6% 50%" alt="" /></div>
-      <div class="cloud bc" style="--i:5"><img src="photo11.jpeg" style="object-position: 40% 22%" alt="" /></div>
+      <div class="cloud tl" style="--i:0"><img data-src="photo10.jpeg" style="object-position: 38% 40%" alt="" /></div>
+      <div class="cloud br wide2" style="--i:1"><img data-src="photo12.jpeg" style="object-position: 50% 30%" alt="" /></div>
+      <div class="cloud tr" style="--i:2"><img data-src="photo3.jpeg" style="object-position: 50% 30%" alt="" /></div>
+      <div class="cloud bl" style="--i:3"><img data-src="photo4.jpeg" style="object-position: 55% 55%" alt="" /></div>
+      <div class="cloud tc narrow8" style="--i:4"><img data-src="photo8.jpeg" style="object-position: 6% 50%" alt="" /></div>
+      <div class="cloud bc" style="--i:5"><img data-src="photo11.jpeg" style="object-position: 40% 22%" alt="" /></div>
     </div>
     <div class="card" id="card">
 
       <!-- FRONT -->
       <section class="face front" aria-label="Sampul undangan">
-        <img class="cover-photo" src="photo.jpeg" alt="Alip Arselan dan Aisyah Zulaikha" />
+        <img class="cover-photo" src="photo.jpeg" fetchpriority="high" decoding="async" alt="Alip Arselan dan Aisyah Zulaikha" />
         <div class="cover-wash"></div>
         <div class="frame"></div>
 
@@ -670,6 +671,20 @@
       p.style.setProperty("--dur", (5 + Math.random() * 3) + "s");
       petalsLayer.appendChild(p);
     }
+
+    // Load order: cover photo first, then the cloud photos and the music
+    (function () {
+      const cover = document.querySelector(".cover-photo");
+      let done = false;
+      function loadRest() {
+        if (done) return; done = true;
+        document.querySelectorAll(".cloud img[data-src]").forEach(function (i) { i.src = i.dataset.src; });
+        const m = document.getElementById("bgm");
+        m.src = "music.mp3"; m.preload = "auto"; m.load();
+      }
+      if (cover.complete) loadRest();
+      else { cover.addEventListener("load", loadRest); cover.addEventListener("error", loadRest); setTimeout(loadRest, 5000); }
+    })();
 
     const bgm = document.getElementById("bgm");
     const soundBtn = document.getElementById("soundBtn");
