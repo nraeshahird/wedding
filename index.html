@@ -14,6 +14,7 @@
       --blush: #f6cfc4;
       --cream: #fff6ef;
       --gold: #c9973a;
+      --gold-deep: #7d5410;
       --gold-light: #e9cf94;
       --rose: #e9a9a0;
       --ink: #3d2f2c;
@@ -148,7 +149,7 @@
     .script {
       font-family: "Great Vibes", cursive;
       font-weight: 400;
-      color: var(--gold);
+      color: var(--gold-deep);
       line-height: 1.1;
     }
 
@@ -347,6 +348,30 @@
       text-underline-offset: 4px;
     }
 
+    /* ---------- Sound toggle ---------- */
+    .sound-btn {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--gold);
+      background: rgba(255, 246, 239, 0.92);
+      color: var(--gold-deep);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+      box-shadow: 0 4px 12px rgba(120, 60, 40, 0.25);
+    }
+    .sound-btn.show { display: flex; }
+    .sound-btn svg { width: 22px; height: 22px; }
+    .sound-btn .off { display: none; }
+    .sound-btn.muted .on { display: none; }
+    .sound-btn.muted .off { display: block; }
+
     /* ---------- Petals ---------- */
     .petals {
       position: fixed;
@@ -475,6 +500,13 @@
     </defs>
   </svg>
 
+  <audio id="bgm" src="music.mp3" loop preload="auto"></audio>
+
+  <button class="sound-btn" id="soundBtn" type="button" aria-label="Bunyi">
+    <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+    <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
+  </button>
+
   <div class="petals" id="petals" aria-hidden="true"></div>
 
   <div class="scene">
@@ -571,8 +603,59 @@
       petalsLayer.appendChild(p);
     }
 
+    const bgm = document.getElementById("bgm");
+    const soundBtn = document.getElementById("soundBtn");
+    let audioOk = true;
+    bgm.volume = 0.6;
+    bgm.addEventListener("error", () => { audioOk = false; soundBtn.classList.remove("show"); });
+    // Show the mute button as soon as the music file is available
+    bgm.addEventListener("canplay", () => { if (audioOk) soundBtn.classList.add("show"); });
+
+    // Try to start the music straight away. Browsers usually block sound until
+    // the first tap, so if it is blocked, start it on the very first touch/click/key.
+    let started = false;
+    function startMusic() {
+      if (started || !audioOk) return;
+      const pr = bgm.play();
+      if (pr && pr.then) {
+        pr.then(() => { started = true; removeGesture(); }).catch(() => {});
+      } else { started = true; removeGesture(); }
+    }
+    const gestureEvents = ["pointerdown", "touchend", "click", "keydown"];
+    function removeGesture() { gestureEvents.forEach(ev => document.removeEventListener(ev, startMusic)); }
+    gestureEvents.forEach(ev => document.addEventListener(ev, startMusic, { passive: true }));
+    startMusic();
+
+    // Soft chime made in the browser, so there is sound even without a music file
+    function chime() {
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AC();
+        [659.25, 783.99, 987.77, 1318.5].forEach((f, i) => {
+          const t = ctx.currentTime + i * 0.16;
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = "sine";
+          o.frequency.value = f;
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(0.18, t + 0.03);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(t); o.stop(t + 1.7);
+        });
+      } catch (e) {}
+    }
+
+    soundBtn.addEventListener("click", () => {
+      bgm.muted = !bgm.muted;
+      soundBtn.classList.toggle("muted", bgm.muted);
+      if (!bgm.muted && bgm.paused) bgm.play().catch(() => {});
+    });
+
     document.getElementById("openBtn").addEventListener("click", () => {
       card.classList.add("open");
+      chime();
+      startMusic();
       body.classList.remove("flying");
       void body.offsetWidth;
       body.classList.add("flying");
@@ -584,3 +667,4 @@
   </script>
 </body>
 </html>
+
